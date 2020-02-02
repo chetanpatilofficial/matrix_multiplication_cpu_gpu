@@ -70,7 +70,7 @@ int main()
     printf("Enter dim_m, dim_n, dim_k values:\n");
     int m, n, k;
     scanf("%d %d %d", &m, &n, &k);
-    const int dim_m = BLOCK_SIZE * m, dim_n = BLOCK_SIZE * n, dim_k = BLOCK_SIZE * k;
+    const int dim_m = m, dim_n = n, dim_k = k;
     int* L_matrix, * R_matrix, * Res_matrix, * L_matrix_gpu, * R_matrix_gpu, * Res_matrix_gpu, * c_verify, * Res_host;
 
     L_matrix = new int[dim_m * dim_n];
@@ -105,7 +105,7 @@ int main()
     matrix_multiplication_cpu(dim_m, dim_n, dim_k, L_matrix, R_matrix, Res_matrix);
     finish = clock();
 
-    sTime = (float)1000 * (finish - start) / CLOCKS_PER_SEC;
+    sTime = (double)1000 * (finish - start) / CLOCKS_PER_SEC;
 
     //print_matrices(Res_matrix, "CPU_out", dim_m, dim_n, dim_k);
     printf("Run time on CPU: %lf ms", sTime);
@@ -117,7 +117,7 @@ int main()
     cudaMemcpy(Res_host, Res_matrix_gpu, dim_m * dim_k * sizeof * Res_matrix_gpu, cudaMemcpyDeviceToHost);
     finish = clock();
     //print_matrices(Res_host, "GPU_out", dim_m, dim_n, dim_k);
-    sTime = (float)1000 * (finish - start) / CLOCKS_PER_SEC;
+    sTime = (double)1000 * (finish - start) / CLOCKS_PER_SEC;
     printf("Run time on GPU: %lf ms", sTime);
 
     cudaMemset(Res_matrix_gpu, 0, dim_m * dim_k * sizeof * Res_matrix_gpu);
