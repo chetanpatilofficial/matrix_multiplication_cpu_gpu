@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <cuda.h>
@@ -11,7 +10,7 @@
 #include <iomanip>
 #include <cstdlib>
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 8
 
 
 __global__ void matrix_multiplication_kernel(int dim_m, int dim_n, int dim_k, const int* L_matrix, const int* R_matrix, int* Res_matrix)
@@ -58,9 +57,9 @@ void print_matrices(int* matrix, char* file_Name, int x_dim, int y_dim, int dim)
 
         for (int j = 0; j < y_dim; j++) {
             outFile << matrix[i * dim + j] << " ";
-            printf("%d ", matrix[i * dim + j]);
+            //printf("%d ", matrix[i * dim + j]);
         }
-        printf("\n");
+        //printf("\n");
         outFile << std::endl;
     }
 }
@@ -89,8 +88,8 @@ int main()
     for (int i = 0; i < dim_n * dim_k; ++i)
         R_matrix[i] = (i % 2 == 0 ? 1 : 0);
 
-    print_matrices(L_matrix, "Input_LHS", dim_m, dim_n, dim_k);
-    print_matrices(R_matrix, "Input_RHS", dim_m, dim_n, dim_k);
+    //print_matrices(L_matrix, "Input_LHS", dim_m, dim_n, dim_k);
+    //print_matrices(R_matrix, "Input_RHS", dim_m, dim_n, dim_k);
     size_t vector_size;
     vector_size = dim_m * dim_k * sizeof(int);
     Res_host = (int*)malloc(vector_size);
@@ -99,33 +98,33 @@ int main()
     cudaMemcpy(L_matrix_gpu, L_matrix, dim_m * dim_n * sizeof * L_matrix_gpu, cudaMemcpyHostToDevice);
     cudaMemcpy(R_matrix_gpu, R_matrix, dim_n * dim_k * sizeof * R_matrix_gpu, cudaMemcpyHostToDevice);
 
+    //Matrix Multiplication in host(CPU)
     float sTime;
     clock_t start, finish;
-
     start = clock();
     matrix_multiplication_cpu(dim_m, dim_n, dim_k, L_matrix, R_matrix, Res_matrix);
     finish = clock();
 
-    sTime = (float)1000 *(finish - start) / CLOCKS_PER_SEC;
+    sTime = (float)1000 * (finish - start) / CLOCKS_PER_SEC;
 
-    print_matrices(Res_matrix, "CPU_out", dim_m, dim_n, dim_k);
-    printf("Run time on CPU: %.10f ms", sTime);
+    //print_matrices(Res_matrix, "CPU_out", dim_m, dim_n, dim_k);
+    printf("Run time on CPU: %lf ms", sTime);
 
+    //Matrix Multiplication in device(GPU)
     start = clock();
     matrix_multiplication_gpu(dim_m, dim_n, dim_k, L_matrix_gpu, R_matrix_gpu, Res_matrix_gpu);
     cudaThreadSynchronize();
     cudaMemcpy(Res_host, Res_matrix_gpu, dim_m * dim_k * sizeof * Res_matrix_gpu, cudaMemcpyDeviceToHost);
     finish = clock();
-    print_matrices(Res_host, "GPU_out", dim_m, dim_n, dim_k);
-    sTime = (float)1000 *(finish - start) / CLOCKS_PER_SEC;
-    printf("Run time on GPU: %.10f ms", sTime);
+    //print_matrices(Res_host, "GPU_out", dim_m, dim_n, dim_k);
+    sTime = (float)1000 * (finish - start) / CLOCKS_PER_SEC;
+    printf("Run time on GPU: %lf ms", sTime);
 
     cudaMemset(Res_matrix_gpu, 0, dim_m * dim_k * sizeof * Res_matrix_gpu);
     cudaFree(Res_matrix_gpu);
     cudaFree(L_matrix_gpu);
     cudaFree(R_matrix_gpu);
 
-    delete[] c_verify;
     delete[] Res_matrix;
     delete[] R_matrix;
     delete[] L_matrix;
